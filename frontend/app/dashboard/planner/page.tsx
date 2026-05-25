@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Brain, AlertTriangle, Clock, Loader2, BookOpen, MessageCircle } from "lucide-react";
+import { Brain, AlertTriangle, Clock, Loader2, BookOpen, MessageCircle, Sparkles } from "lucide-react";
 import { clsx } from "clsx";
 import { useRouter } from "next/navigation";
 
@@ -27,16 +27,17 @@ interface StudyPlan {
   saved?: boolean;
 }
 
+// Updated for premium dark mode
 const priorityColors: Record<string, string> = {
-  high: "border-l-red-500 bg-red-50",
-  medium: "border-l-amber-500 bg-amber-50",
-  low: "border-l-green-500 bg-green-50",
+  high: "border-l-rose-500 bg-rose-500/5 hover:bg-rose-500/10 border-t-transparent border-r-transparent border-b-transparent border-y-slate-800 border-r-slate-800",
+  medium: "border-l-amber-500 bg-amber-500/5 hover:bg-amber-500/10 border-t-transparent border-r-transparent border-b-transparent border-y-slate-800 border-r-slate-800",
+  low: "border-l-emerald-500 bg-emerald-500/5 hover:bg-emerald-500/10 border-t-transparent border-r-transparent border-b-transparent border-y-slate-800 border-r-slate-800",
 };
 
 const priorityBadge: Record<string, string> = {
-  high: "bg-red-100 text-red-700",
-  medium: "bg-amber-100 text-amber-700",
-  low: "bg-green-100 text-green-700",
+  high: "bg-rose-500/10 text-rose-400 border border-rose-500/20",
+  medium: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+  low: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
 };
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -120,202 +121,264 @@ export default function PlannerPage() {
 
   if (loadingSaved) {
     return (
-      <div className="p-8 flex items-center justify-center h-full">
-        <div className="text-center">
-          <Loader2 size={40} className="mx-auto text-slate-300 mb-4 animate-spin" />
-          <p className="text-slate-500">Loading your study plan...</p>
+      <div className="flex flex-col items-center justify-center min-h-[80vh] bg-slate-950">
+        <div className="p-6 bg-slate-900 rounded-2xl border border-slate-800 flex flex-col items-center shadow-2xl">
+          <Loader2 size={40} className="text-indigo-400 animate-spin mx-auto mb-4" />
+          <p className="text-slate-400 font-medium tracking-wide">Loading your study plan...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800">AI Study Planner</h2>
-          <p className="text-slate-500 mt-1">Your personalized 7-day study schedule powered by AI</p>
-          {plan?.expires_at && (
-            <p className="text-xs text-slate-400 mt-1">
-              Plan saved · expires {new Date(plan.expires_at).toLocaleDateString()}
-            </p>
-          )}
-        </div>
-        <button
-          onClick={generatePlan}
-          disabled={loading}
-          className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors disabled:opacity-50"
-        >
-          {loading ? <Loader2 size={16} className="animate-spin" /> : <Brain size={16} />}
-          {loading ? "Generating..." : plan ? "Regenerate Plan" : "Generate 7-Day Plan"}
-        </button>
-      </div>
-
-      {error && (
-        <div className="bg-red-50 border border-red-100 rounded-xl p-4 mb-6 mt-4">
-          <p className="text-sm text-red-600">{error}</p>
-        </div>
-      )}
-
-      {!plan && !loading && !error && (
-        <div className="bg-white border border-gray-200 rounded-xl p-12 text-center mt-8">
-          <Brain size={48} className="mx-auto text-slate-200 mb-4" />
-          <p className="text-slate-600 font-medium mb-2">No study plan yet</p>
-          <p className="text-slate-400 text-sm mb-6">
-            Click Generate 7-Day Plan to create your personalized weekly schedule
-          </p>
+    <div className="min-h-screen bg-slate-950 p-6 lg:p-8 text-slate-200 selection:bg-indigo-500/30">
+      <div className="max-w-6xl mx-auto">
+        
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+          <div>
+            <h2 className="text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+              <Brain className="text-indigo-400" size={32} />
+              AI Study <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">Planner</span>
+            </h2>
+            <p className="text-slate-400 mt-2 text-sm md:text-base">Your personalized 7-day schedule, perfectly optimized by AI.</p>
+            {plan?.expires_at && (
+              <p className="text-xs font-medium text-slate-500 mt-2 flex items-center gap-1.5 bg-slate-900 w-fit px-2.5 py-1 rounded-md border border-slate-800">
+                <Clock size={12} className="text-indigo-400" />
+                Plan valid until {new Date(plan.expires_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+              </p>
+            )}
+          </div>
           <button
             onClick={generatePlan}
-            className="inline-flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
+            disabled={loading}
+            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-[0_0_20px_rgba(79,70,229,0.3)] transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none disabled:cursor-not-allowed"
           >
-            <Brain size={16} />
-            Generate My Study Plan
+            {loading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+            {loading ? "Generating..." : plan ? "Regenerate Plan" : "Generate 7-Day Plan"}
           </button>
         </div>
-      )}
 
-      {loading && (
-        <div className="bg-white border border-gray-200 rounded-xl p-12 text-center mt-8">
-          <Loader2 size={48} className="mx-auto text-slate-300 mb-4 animate-spin" />
-          <p className="text-slate-600 font-medium">AI is creating your 7-day study plan...</p>
-          <p className="text-slate-400 text-sm mt-2">
-            Analyzing your assignments, deadlines and priorities
-          </p>
-        </div>
-      )}
+        {error && (
+          <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 mb-8 flex items-start gap-3">
+            <AlertTriangle size={18} className="text-rose-400 mt-0.5 shrink-0" />
+            <p className="text-sm font-medium text-rose-300">{error}</p>
+          </div>
+        )}
 
-      {plan && !loading && (
-        <div className="space-y-6 mt-6">
-          {plan.risk_alerts?.length > 0 && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle size={16} className="text-red-600" />
-                <p className="text-sm font-semibold text-red-700">Risk Alerts</p>
+        {/* Empty State */}
+        {!plan && !loading && !error && (
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-16 text-center mt-8 relative overflow-hidden shadow-2xl">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none"></div>
+            <div className="relative z-10">
+              <div className="w-20 h-20 bg-slate-950 rounded-full flex items-center justify-center mx-auto mb-6 border border-slate-800 shadow-inner">
+                <Brain size={36} className="text-indigo-400/50" />
               </div>
-              <div className="space-y-1">
-                {plan.risk_alerts.map((alert, i) => (
-                  <p key={i} className="text-sm text-red-600 ml-6">• {alert}</p>
-                ))}
-              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">No study plan yet</h3>
+              <p className="text-slate-400 mb-8 max-w-md mx-auto">
+                Click generate to let AI analyze your upcoming assignments, priorities, and deadlines to craft the perfect weekly schedule.
+              </p>
+              <button
+                onClick={generatePlan}
+                className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-bold shadow-[0_0_20px_rgba(79,70,229,0.3)] transition-all transform hover:-translate-y-0.5"
+              >
+                <Sparkles size={18} />
+                Generate My Study Plan
+              </button>
             </div>
-          )}
+          </div>
+        )}
 
-          {plan.recommendations?.length > 0 && (
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Brain size={16} className="text-blue-600" />
-                <p className="text-sm font-semibold text-blue-700">AI Recommendations</p>
+        {/* Generating Loading State */}
+        {loading && (
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-16 text-center mt-8 relative overflow-hidden shadow-2xl">
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-violet-500/10 blur-[80px] rounded-full pointer-events-none animate-pulse"></div>
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="w-20 h-20 bg-slate-950 rounded-full flex items-center justify-center mx-auto mb-6 border border-slate-800 shadow-inner relative">
+                <div className="absolute inset-0 rounded-full border-2 border-indigo-500/30 animate-ping"></div>
+                <Loader2 size={36} className="text-indigo-400 animate-spin" />
               </div>
-              <div className="space-y-1">
-                {plan.recommendations.map((rec, i) => (
-                  <p key={i} className="text-sm text-blue-600 ml-6">• {rec}</p>
-                ))}
-              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Architecting your schedule...</h3>
+              <p className="text-slate-400 text-sm">
+                Analyzing your assignments, balancing priorities, and preventing burnout.
+              </p>
             </div>
-          )}
+          </div>
+        )}
 
-          {plan.study_plan?.length > 0 && (
-            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-              <div className="flex overflow-x-auto border-b border-gray-200">
-                {plan.study_plan.map((day, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveDay(i)}
-                    className={clsx(
-                      "flex-shrink-0 px-5 py-4 text-sm font-medium transition-colors border-r border-gray-200 last:border-r-0",
-                      activeDay === i
-                        ? "bg-slate-900 text-white"
-                        : "text-slate-600 hover:bg-slate-50"
-                    )}
-                  >
-                    <p>{day.day}</p>
-                    <p className={clsx(
-                      "text-xs mt-0.5",
-                      activeDay === i ? "text-slate-300" : "text-slate-400"
-                    )}>
-                      {day.sessions?.length || 0} sessions
-                    </p>
-                  </button>
-                ))}
-              </div>
-
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-800">
-                      {plan.study_plan[activeDay]?.day}
-                    </h3>
-                    <p className="text-sm text-slate-500">
-                      {plan.study_plan[activeDay]?.date} •{" "}
-                      {getTotalHours(plan.study_plan[activeDay]?.sessions || []).toFixed(1)} hours planned
-                    </p>
+        {/* Loaded Plan UI */}
+        {plan && !loading && (
+          <div className="space-y-6 mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            
+            {/* Alerts & Recommendations Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {plan.risk_alerts?.length > 0 && (
+                <div className="bg-rose-950/20 border border-rose-900/40 rounded-2xl p-5 shadow-lg">
+                  <div className="flex items-center gap-2.5 mb-4">
+                    <div className="p-2 bg-rose-500/10 rounded-lg">
+                      <AlertTriangle size={18} className="text-rose-400" />
+                    </div>
+                    <p className="text-base font-bold text-rose-300">Risk Alerts</p>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-slate-500">
-                    <BookOpen size={14} />
-                    {plan.study_plan[activeDay]?.sessions?.length || 0} study sessions
-                  </div>
-                </div>
-
-                {plan.study_plan[activeDay]?.sessions?.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-slate-400">Rest day — no sessions planned</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {plan.study_plan[activeDay]?.sessions?.map((session, i) => (
-                      <div
-                        key={i}
-                        className={clsx(
-                          "border-l-4 rounded-r-xl p-5",
-                          priorityColors[session.priority] || "border-l-slate-300 bg-slate-50"
-                        )}
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                              <p className="font-semibold text-slate-800">{session.subject}</p>
-                              <span className={clsx(
-                                "text-xs px-2 py-0.5 rounded-full font-medium",
-                                priorityBadge[session.priority] || "bg-slate-100 text-slate-600"
-                              )}>
-                                {session.priority} priority
-                              </span>
-                            </div>
-                            <p className="text-sm text-slate-600 mb-3">{session.task}</p>
-                            <div className="flex items-center gap-4 text-xs text-slate-500">
-                              <span className="flex items-center gap-1">
-                                <Clock size={12} />
-                                {session.time}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Brain size={12} />
-                                {session.duration_minutes} minutes
-                              </span>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => handleAskAssistant(session.task, session.subject)}
-                            className="flex items-center gap-1.5 text-xs bg-white border border-gray-200 text-slate-600 px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors shrink-0"
-                          >
-                            <MessageCircle size={12} />
-                            Ask AI
-                          </button>
-                        </div>
+                  <div className="space-y-2.5">
+                    {plan.risk_alerts.map((alert, i) => (
+                      <div key={i} className="flex items-start gap-2 text-sm text-rose-200/80">
+                        <span className="text-rose-500 mt-1.5">•</span>
+                        <p leading-relaxed>{alert}</p>
                       </div>
                     ))}
                   </div>
-                )}
-              </div>
-            </div>
-          )}
+                </div>
+              )}
 
-          {plan.message && (
-            <div className="bg-white border border-gray-200 rounded-xl p-6 text-center">
-              <p className="text-slate-500">{plan.message}</p>
+              {plan.recommendations?.length > 0 && (
+                <div className="bg-indigo-950/20 border border-indigo-900/40 rounded-2xl p-5 shadow-lg">
+                  <div className="flex items-center gap-2.5 mb-4">
+                    <div className="p-2 bg-indigo-500/10 rounded-lg">
+                      <Brain size={18} className="text-indigo-400" />
+                    </div>
+                    <p className="text-base font-bold text-indigo-300">AI Insights</p>
+                  </div>
+                  <div className="space-y-2.5">
+                    {plan.recommendations.map((rec, i) => (
+                      <div key={i} className="flex items-start gap-2 text-sm text-indigo-200/80">
+                        <span className="text-indigo-500 mt-1.5">•</span>
+                        <p leading-relaxed>{rec}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      )}
+
+            {/* Main Schedule Viewer */}
+            {plan.study_plan?.length > 0 && (
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative">
+                {/* Background ambient light */}
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] pointer-events-none"></div>
+
+                {/* Day Navigation Pills */}
+                <div className="p-4 border-b border-slate-800 bg-slate-950/50">
+                  <div className="flex overflow-x-auto gap-2 pb-2 custom-scrollbar">
+                    {plan.study_plan.map((day, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setActiveDay(i)}
+                        className={clsx(
+                          "flex-shrink-0 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-300 flex flex-col items-start min-w-[120px]",
+                          activeDay === i
+                            ? "bg-indigo-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.3)] scale-100"
+                            : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800 hover:border-slate-700 scale-95 origin-bottom"
+                        )}
+                      >
+                        <p>{day.day.substring(0, 3)}</p>
+                        <p className={clsx(
+                          "text-[11px] mt-1 font-medium tracking-wide uppercase",
+                          activeDay === i ? "text-indigo-200" : "text-slate-500"
+                        )}>
+                          {day.sessions?.length || 0} tasks
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Active Day Content */}
+                <div className="p-6 md:p-8 relative z-10">
+                  <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+                    <div>
+                      <h3 className="text-2xl font-extrabold text-white tracking-tight">
+                        {plan.study_plan[activeDay]?.day}
+                      </h3>
+                      <p className="text-sm font-medium text-slate-400 mt-1">
+                        {plan.study_plan[activeDay]?.date}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-4 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 w-fit">
+                      <div className="flex items-center gap-2 text-sm font-bold text-indigo-400">
+                        <Clock size={16} />
+                        {getTotalHours(plan.study_plan[activeDay]?.sessions || []).toFixed(1)} hrs
+                      </div>
+                      <div className="w-px h-4 bg-slate-800"></div>
+                      <div className="flex items-center gap-2 text-sm font-bold text-violet-400">
+                        <BookOpen size={16} />
+                        {plan.study_plan[activeDay]?.sessions?.length || 0} tasks
+                      </div>
+                    </div>
+                  </div>
+
+                  {plan.study_plan[activeDay]?.sessions?.length === 0 ? (
+                    <div className="text-center py-16 px-4 border-2 border-dashed border-slate-800 rounded-2xl">
+                      <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Sparkles size={24} className="text-emerald-400" />
+                      </div>
+                      <p className="text-lg font-bold text-white">Rest Day</p>
+                      <p className="text-slate-400 text-sm mt-1">AI has cleared your schedule for recovery.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4 relative before:absolute before:inset-y-0 before:left-[11px] before:w-[2px] before:bg-slate-800 pl-8">
+                      {plan.study_plan[activeDay]?.sessions?.map((session, i) => (
+                        <div
+                          key={i}
+                          className={clsx(
+                            "relative border rounded-2xl p-5 sm:p-6 transition-all duration-300 group",
+                            priorityColors[session.priority] || "border border-slate-800 bg-slate-900/50 hover:bg-slate-800/80"
+                          )}
+                        >
+                          {/* Timeline dot */}
+                          <div className={clsx(
+                            "absolute top-8 -left-[27px] w-3 h-3 rounded-full border-2 border-slate-950 z-10 shadow-[0_0_0_4px_rgba(2,6,23,1)]",
+                            session.priority === 'high' ? "bg-rose-500" :
+                            session.priority === 'medium' ? "bg-amber-500" : "bg-emerald-500"
+                          )}></div>
+
+                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                <h4 className="text-lg font-bold text-white">{session.subject}</h4>
+                                <span className={clsx(
+                                  "text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider",
+                                  priorityBadge[session.priority] || "bg-slate-800 text-slate-400 border border-slate-700"
+                                )}>
+                                  {session.priority} priority
+                                </span>
+                              </div>
+                              <p className="text-sm font-medium text-slate-300 mb-4 leading-relaxed">{session.task}</p>
+                              <div className="flex items-center gap-4 flex-wrap">
+                                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
+                                  <Clock size={14} className="text-slate-400" />
+                                  {session.time}
+                                </span>
+                                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
+                                  <Brain size={14} className="text-indigo-400" />
+                                  {session.duration_minutes} min block
+                                </span>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => handleAskAssistant(session.task, session.subject)}
+                              className="flex items-center justify-center gap-2 text-xs font-bold bg-slate-950 border border-slate-800 text-slate-300 px-4 py-2.5 rounded-xl hover:bg-indigo-500/10 hover:text-indigo-300 hover:border-indigo-500/30 transition-all shrink-0 w-full sm:w-auto"
+                            >
+                              <MessageCircle size={14} />
+                              Ask AI
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {plan.message && (
+              <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4 text-center">
+                <p className="text-sm font-medium text-slate-400">{plan.message}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
