@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Sparkles } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
@@ -42,38 +43,46 @@ export default function Home() {
 
   // The UI will purely be the loading screen until the router pushes them away
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
-      <div className="flex flex-col items-center p-8 bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 max-w-sm w-full transition-all">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 px-4 relative overflow-hidden selection:bg-indigo-500/30">
+      
+      {/* Ambient Background Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/10 blur-[120px] rounded-full pointer-events-none animate-pulse"></div>
+      
+      <div className="flex flex-col items-center p-10 bg-slate-900/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-800 max-w-sm w-full relative z-10 transition-all">
         
-        {/* Animated SVG Spinner */}
-        <svg
-          className="animate-spin h-12 w-12 text-blue-600 mb-6"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          ></circle>
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          ></path>
-        </svg>
+        {/* Custom Glowing AI Spinner */}
+        <div className="relative mb-8 flex items-center justify-center">
+          {/* Inner pulsating glow */}
+          <div className="absolute inset-0 bg-indigo-500/20 rounded-full blur-xl animate-pulse"></div>
+          
+          {/* The ring container */}
+          <div className="w-20 h-20 bg-slate-950 rounded-full border border-slate-800 flex items-center justify-center relative shadow-inner">
+            {/* Spinning gradient border effect */}
+            <div className="absolute inset-0 rounded-full border-t-2 border-indigo-400 animate-spin"></div>
+            <div className="absolute inset-0 rounded-full border-r-2 border-violet-500/30 animate-spin" style={{ animationDirection: "reverse", animationDuration: "1.5s" }}></div>
+            
+            {/* Center icon */}
+            <Sparkles className="text-violet-400 absolute animate-pulse" size={24} />
+          </div>
+        </div>
 
         {/* Typography */}
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">
-          Standby...
-        </h2>
-        <p className="text-sm text-gray-500 text-center animate-pulse">
-          This might take a few seconds on the first load. Please hang tight!
+        <h1 className="text-2xl font-extrabold tracking-tight text-white mb-3 text-center">
+          Waking up <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">AI Core</span>
+        </h1>
+        
+        <p className="text-sm font-medium text-slate-400 text-center leading-relaxed">
+          Establishing a secure connection to the neural network. This might take a few seconds on the first load.
         </p>
+
+        {/* Status Indicator */}
+        <div className="mt-8 flex items-center gap-3 px-4 py-2 bg-slate-950 rounded-full border border-slate-800 shadow-inner">
+          <div className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+          </div>
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">System Standby</span>
+        </div>
         
       </div>
     </div>
