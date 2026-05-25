@@ -187,7 +187,7 @@ export default function AssistantPage() {
         {
           id: (Date.now() + 1).toString(),
           role: "assistant",
-          content: "Sorry, I encountered an error. Please try again.",
+          content: "Sorry, I encountered an error connecting to the neural network. Please try again.",
         },
       ]);
     } finally {
@@ -196,42 +196,60 @@ export default function AssistantPage() {
   };
 
   return (
-    <div className="flex h-full">
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-4 border-b border-gray-200">
+    <div className="flex h-[calc(100vh-4rem)] lg:h-screen bg-slate-950 text-slate-200 selection:bg-indigo-500/30 overflow-hidden">
+      
+      {/* Sidebar - History */}
+      <aside className="w-72 bg-slate-950 border-r border-slate-800 flex flex-col flex-shrink-0 relative z-20">
+        <div className="p-5 border-b border-slate-800">
           <button
             onClick={newChat}
-            className="w-full flex items-center gap-2 bg-slate-900 text-white px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-3 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(79,70,229,0.2)] hover:shadow-[0_0_20px_rgba(79,70,229,0.4)]"
           >
-            <Plus size={16} />
-            New Chat
+            <Plus size={18} />
+            New Chat Session
           </button>
         </div>
-        <div className="flex-1 overflow-auto p-3 space-y-1">
+        
+        <div className="flex-1 overflow-y-auto p-3 space-y-1 custom-scrollbar">
           {loadingSessions ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 size={20} className="animate-spin text-slate-300" />
+            <div className="flex flex-col items-center justify-center py-12 gap-3 opacity-70">
+              <Loader2 size={24} className="animate-spin text-indigo-400" />
+              <p className="text-xs text-slate-500 font-medium">Loading history...</p>
             </div>
           ) : sessions.length === 0 ? (
-            <p className="text-xs text-slate-400 text-center py-8">No chat history yet</p>
+            <div className="flex flex-col items-center justify-center py-12 text-center px-4">
+              <div className="w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center mb-3">
+                <Clock size={20} className="text-slate-600" />
+              </div>
+              <p className="text-sm font-medium text-slate-400">No chat history yet</p>
+              <p className="text-xs text-slate-500 mt-1">Your conversations will appear here.</p>
+            </div>
           ) : (
             sessions.map((session) => (
               <div
                 key={session.session_id}
                 className={clsx(
-                  "group flex items-center justify-between p-2.5 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors",
-                  currentSessionId === session.session_id && "bg-slate-100"
+                  "group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all border border-transparent",
+                  currentSessionId === session.session_id 
+                    ? "bg-indigo-500/10 border-indigo-500/20" 
+                    : "hover:bg-slate-900 hover:border-slate-800"
                 )}
                 onClick={() => loadSession(session.session_id)}
               >
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-slate-700 truncate">
+                <div className="flex-1 min-w-0 pr-2">
+                  <p className={clsx(
+                    "text-sm font-medium truncate",
+                    currentSessionId === session.session_id ? "text-indigo-300" : "text-slate-300 group-hover:text-white"
+                  )}>
                     {session.first_message}
                   </p>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <Clock size={10} className="text-slate-400" />
-                    <p className="text-xs text-slate-400">
-                      {new Date(session.created_at).toLocaleDateString()}
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <Clock size={12} className={currentSessionId === session.session_id ? "text-indigo-500/70" : "text-slate-600"} />
+                    <p className={clsx(
+                      "text-xs",
+                      currentSessionId === session.session_id ? "text-indigo-400/80" : "text-slate-500"
+                    )}>
+                      {new Date(session.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                     </p>
                   </div>
                 </div>
@@ -240,48 +258,60 @@ export default function AssistantPage() {
                     e.stopPropagation();
                     deleteSession(session.session_id);
                   }}
-                  className="opacity-0 group-hover:opacity-100 p-1 text-red-400 hover:text-red-600 transition-all"
+                  className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-all"
+                  title="Delete session"
                 >
-                  <Trash2 size={12} />
+                  <Trash2 size={14} />
                 </button>
               </div>
             ))
           )}
         </div>
-        <div className="p-3 border-t border-gray-200">
-          <p className="text-xs text-slate-400 text-center">Chats auto-delete after 3 days</p>
+        <div className="p-4 border-t border-slate-800 bg-slate-950/80 backdrop-blur-sm">
+          <p className="text-[11px] font-medium text-slate-500 text-center uppercase tracking-wider">Chats auto-delete after 3 days</p>
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col">
-        <div className="p-6 pb-4 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-slate-800">AI Assistant</h2>
-          <p className="text-slate-500 mt-1">Ask me anything academic — explanations, quizzes, flashcards, summaries</p>
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col relative bg-slate-950">
+        
+        {/* Background glow effects */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-violet-500/5 blur-[120px] pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] pointer-events-none"></div>
+
+        <div className="p-6 pb-4 border-b border-slate-800 bg-slate-950/80 backdrop-blur-md relative z-10">
+          <h2 className="text-2xl font-extrabold tracking-tight text-white flex items-center gap-2">
+            <Sparkles size={24} className="text-violet-400" />
+            AI <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">Assistant</span>
+          </h2>
+          <p className="text-slate-400 mt-1.5 text-sm font-medium">Ask me anything academic — explanations, quizzes, flashcards, summaries.</p>
         </div>
 
-        <div className="flex-1 overflow-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 relative z-10 custom-scrollbar scroll-smooth">
           {messages.map((message) => (
             <div
               key={message.id}
               className={clsx(
-                "flex items-start gap-3",
+                "flex items-start gap-4",
                 message.role === "user" ? "flex-row-reverse" : "flex-row"
               )}
             >
               <div
                 className={clsx(
-                  "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-                  message.role === "user" ? "bg-slate-900 text-white" : "bg-blue-50 text-blue-600"
+                  "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg",
+                  message.role === "user" 
+                    ? "bg-gradient-to-br from-indigo-500 to-indigo-700 text-white" 
+                    : "bg-slate-800 border border-slate-700 text-violet-400"
                 )}
               >
-                {message.role === "user" ? <User size={16} /> : <Bot size={16} />}
+                {message.role === "user" ? <User size={20} /> : <Bot size={20} />}
               </div>
               <div
                 className={clsx(
-                  "max-w-2xl rounded-xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap",
+                  "max-w-[80%] rounded-2xl px-5 py-4 text-sm leading-relaxed whitespace-pre-wrap shadow-sm",
                   message.role === "user"
-                    ? "bg-slate-900 text-white"
-                    : "bg-white border border-gray-200 text-slate-700"
+                    ? "bg-indigo-600 text-white rounded-tr-sm"
+                    : "bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-sm"
                 )}
               >
                 {message.content}
@@ -290,47 +320,53 @@ export default function AssistantPage() {
           ))}
 
           {loading && (
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                <Bot size={16} />
+            <div className="flex items-start gap-4 animate-in fade-in duration-300">
+              <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 text-violet-400 flex items-center justify-center shrink-0 shadow-lg relative overflow-hidden">
+                <div className="absolute inset-0 bg-violet-400/20 animate-pulse"></div>
+                <Bot size={20} className="relative z-10" />
               </div>
-              <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
-                <Loader2 size={16} className="animate-spin text-slate-400" />
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-sm px-5 py-4 flex items-center gap-2">
+                <div className="flex gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-violet-400/60 animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                  <div className="w-2 h-2 rounded-full bg-violet-400/60 animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                  <div className="w-2 h-2 rounded-full bg-violet-400/60 animate-bounce" style={{ animationDelay: "300ms" }}></div>
+                </div>
               </div>
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="p-6 pt-4 border-t border-gray-200">
+        {/* Input Area */}
+        <div className="p-6 pt-2 bg-slate-950/80 backdrop-blur-md border-t border-slate-800 relative z-10">
           <div className="flex flex-wrap gap-2 mb-4">
             {suggestions.map((suggestion) => (
               <button
                 key={suggestion}
                 onClick={() => sendMessage(suggestion)}
-                className="flex items-center gap-1.5 text-xs bg-slate-50 border border-gray-200 text-slate-600 px-3 py-1.5 rounded-full hover:bg-slate-100 transition-colors"
+                className="flex items-center gap-1.5 text-xs font-medium bg-slate-900 border border-slate-800 text-slate-300 px-4 py-2 rounded-full hover:bg-indigo-500/10 hover:border-indigo-500/30 hover:text-indigo-300 transition-all"
               >
-                <Sparkles size={12} />
+                <Sparkles size={12} className="text-indigo-400" />
                 {suggestion}
               </button>
             ))}
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex gap-3 relative">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}
               placeholder="Ask me anything academic..."
-              className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+              className="flex-1 bg-slate-900 border border-slate-800 rounded-2xl pl-5 pr-14 py-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent transition-all shadow-inner"
             />
             <button
               onClick={() => sendMessage()}
               disabled={loading || !input.trim()}
-              className="bg-slate-900 text-white px-4 py-3 rounded-xl hover:bg-slate-700 transition-colors disabled:opacity-50"
+              className="absolute right-2 top-2 bottom-2 aspect-square flex items-center justify-center bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 transition-all disabled:opacity-50 disabled:hover:bg-indigo-600 disabled:cursor-not-allowed shadow-md"
             >
-              <Send size={16} />
+              <Send size={18} className={input.trim() && !loading ? "translate-x-0.5 -translate-y-0.5 transition-transform" : ""} />
             </button>
           </div>
         </div>
