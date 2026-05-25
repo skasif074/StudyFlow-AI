@@ -29,17 +29,17 @@ interface Assignment {
 }
 
 const priorityColors: Record<Priority, string> = {
-  low: "bg-green-50 text-green-700",
-  medium: "bg-amber-50 text-amber-700",
-  high: "bg-orange-50 text-orange-700",
-  urgent: "bg-red-50 text-red-700",
+  low: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+  medium: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+  high: "bg-orange-500/10 text-orange-400 border border-orange-500/20",
+  urgent: "bg-rose-500/10 text-rose-400 border border-rose-500/20",
 };
 
 const statusColors: Record<Status, string> = {
-  pending: "bg-slate-50 text-slate-700",
-  in_progress: "bg-blue-50 text-blue-700",
-  completed: "bg-green-50 text-green-700",
-  overdue: "bg-red-50 text-red-700",
+  pending: "bg-slate-800 text-slate-300 border border-slate-700",
+  in_progress: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
+  completed: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+  overdue: "bg-rose-500/10 text-rose-400 border border-rose-500/20",
 };
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -55,7 +55,7 @@ function openPdfInNewWindow(base64Data: string, filename: string) {
       win.document.write(`
         <html>
           <head><title>${filename}</title></head>
-          <body style="margin:0;background:#1a1a1a;display:flex;justify-content:center;align-items:center;min-height:100vh;">
+          <body style="margin:0;background:#020617;display:flex;justify-content:center;align-items:center;min-height:100vh;">
             <img src="${dataUrl}" style="max-width:100%;max-height:100vh;object-fit:contain;" />
           </body>
         </html>
@@ -229,506 +229,510 @@ export default function AssignmentsPage() {
     }
   };
 
-  const hasQuestion = (a: Assignment) =>
-    !!(a.question_text || a.question_pdf_1);
-
-  const hasPendingPdf = (a: Assignment) =>
-    !!(a.question_pdf_1_name && !a.question_pdf_1);
-
-  const needsRegenerate = (a: Assignment) =>
-    !!(a.question_pdf_2 || a.question_text?.includes("[Extended Question]")) && !a.solution;
+  const hasQuestion = (a: Assignment) => !!(a.question_text || a.question_pdf_1);
+  const hasPendingPdf = (a: Assignment) => !!(a.question_pdf_1_name && !a.question_pdf_1);
+  const needsRegenerate = (a: Assignment) => !!(a.question_pdf_2 || a.question_text?.includes("[Extended Question]")) && !a.solution;
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800">Assignments</h2>
-          <p className="text-slate-500 mt-1">Track and manage your assignments</p>
+    <div className="min-h-screen bg-slate-950 p-6 lg:p-8 text-slate-200 selection:bg-indigo-500/30">
+      <div className="max-w-6xl mx-auto">
+        
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10">
+          <div>
+            <h2 className="text-3xl font-extrabold tracking-tight text-white">
+              Your{" "}
+              <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
+                Assignments
+              </span>
+            </h2>
+            <p className="text-slate-400 mt-2">Track, manage, and solve your tasks using AI.</p>
+          </div>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-[0_0_20px_rgba(79,70,229,0.3)] transition-all transform hover:-translate-y-0.5"
+          >
+            <Plus size={18} />
+            {showForm ? "Close Form" : "New Assignment"}
+          </button>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
-        >
-          <Plus size={16} />
-          Add Assignment
-        </button>
-      </div>
 
-      {showForm && (
-        <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6">
-          <h3 className="text-lg font-semibold text-slate-800 mb-4">New Assignment</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm text-slate-600 mb-1 block">Title *</label>
-              <input
-                type="text"
-                placeholder="Assignment title"
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+        {/* Create Assignment Form */}
+        {showForm && (
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl mb-8 animate-in fade-in slide-in-from-top-4 duration-300">
+            <h3 className="text-xl font-bold text-white mb-6">Create New Assignment</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className="text-sm font-medium text-slate-400 mb-1.5 block">Title *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Calculus Midterm Prep"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-slate-200 placeholder-slate-600 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-400 mb-1.5 block">Course</label>
+                <input
+                  type="text"
+                  placeholder="e.g. MATH 101"
+                  value={form.course_name}
+                  onChange={(e) => setForm({ ...form, course_name: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-slate-200 placeholder-slate-600 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-400 mb-1.5 block">Due Date</label>
+                <input
+                  type="datetime-local"
+                  value={form.due_date}
+                  onChange={(e) => setForm({ ...form, due_date: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-slate-200 transition-colors [color-scheme:dark]"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-400 mb-1.5 block">Priority</label>
+                <select
+                  value={form.priority}
+                  onChange={(e) => setForm({ ...form, priority: e.target.value as Priority })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-slate-200 transition-colors"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <label className="text-sm font-medium text-slate-400 mb-1.5 block">
+                Question Text <span className="text-slate-500">(optional)</span>
+              </label>
+              <textarea
+                placeholder="Type or paste your question here..."
+                value={form.question_text}
+                onChange={(e) => setForm({ ...form, question_text: e.target.value })}
+                rows={3}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-slate-200 placeholder-slate-600 transition-colors"
               />
             </div>
-            <div>
-              <label className="text-sm text-slate-600 mb-1 block">Course</label>
-              <input
-                type="text"
-                placeholder="Course name"
-                value={form.course_name}
-                onChange={(e) => setForm({ ...form, course_name: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
-              />
-            </div>
-            <div>
-              <label className="text-sm text-slate-600 mb-1 block">Due Date</label>
-              <input
-                type="datetime-local"
-                value={form.due_date}
-                onChange={(e) => setForm({ ...form, due_date: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
-              />
-            </div>
-            <div>
-              <label className="text-sm text-slate-600 mb-1 block">Priority</label>
-              <select
-                value={form.priority}
-                onChange={(e) => setForm({ ...form, priority: e.target.value as Priority })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+
+            <div className="mt-5">
+              <label className="text-sm font-medium text-slate-400 mb-1.5 block">
+                Upload Document <span className="text-slate-500">(optional — PDF or Image)</span>
+              </label>
+              <div
+                onClick={() => formFileRef.current?.click()}
+                className="border-2 border-dashed border-slate-700 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500/50 hover:bg-slate-800/50 transition-all group"
               >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-                <option value="urgent">Urgent</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <label className="text-sm text-slate-600 mb-1 block">
-              Question Text <span className="text-slate-400">(optional)</span>
-            </label>
-            <textarea
-              placeholder="Type or paste your question here..."
-              value={form.question_text}
-              onChange={(e) => setForm({ ...form, question_text: e.target.value })}
-              rows={3}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
-            />
-          </div>
-
-          <div className="mt-4">
-            <label className="text-sm text-slate-600 mb-1 block">
-              Upload Question Paper <span className="text-slate-400">(optional — PDF or Image)</span>
-            </label>
-            <div
-              onClick={() => formFileRef.current?.click()}
-              className="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-slate-300 hover:bg-slate-50 transition-colors"
-            >
-              <input
-                ref={formFileRef}
-                type="file"
-                accept=".pdf,.jpg,.jpeg,.png,.webp"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) setUploadFile(file);
-                }}
-              />
-              {uploadFile ? (
-                <div className="flex items-center justify-center gap-3">
-                  <FileText size={20} className="text-red-500" />
-                  <p className="text-sm font-medium text-slate-700">{uploadFile.name}</p>
-                  <p className="text-xs text-slate-400">({(uploadFile.size / 1024).toFixed(1)} KB)</p>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setUploadFile(null); }}
-                    className="text-slate-400 hover:text-red-500 transition-colors"
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center gap-2 text-slate-400">
-                  <Upload size={16} />
-                  <p className="text-sm">Upload PDF or Image of question paper</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex gap-3 mt-4">
-            <button
-              onClick={handleAdd}
-              disabled={saving}
-              className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors disabled:opacity-50"
-            >
-              {saving && <Loader2 size={14} className="animate-spin" />}
-              {saving
-                ? (form.question_text || uploadFile ? "Saving & Solving..." : "Saving...")
-                : "Save Assignment"}
-            </button>
-            <button
-              onClick={() => { setShowForm(false); setUploadFile(null); }}
-              className="border border-gray-200 text-slate-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-      {loading ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
-          <Loader2 size={40} className="mx-auto text-slate-300 mb-4 animate-spin" />
-          <p className="text-slate-500">Loading assignments...</p>
-        </div>
-      ) : assignments.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
-          <BookOpen size={40} className="mx-auto text-slate-300 mb-4" />
-          <p className="text-slate-500">No assignments yet. Add your first one!</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {assignments.map((assignment) => (
-            <div key={assignment.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-              <div className="p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <p className={clsx(
-                        "font-medium text-slate-800",
-                        assignment.status === "completed" && "line-through text-slate-400"
-                      )}>
-                        {assignment.title}
-                      </p>
-                      {assignment.source === "google_classroom" && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-700 font-medium">
-                          Classroom
-                        </span>
-                      )}
+                <input
+                  ref={formFileRef}
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,.webp"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setUploadFile(file);
+                  }}
+                />
+                {uploadFile ? (
+                  <div className="flex items-center justify-center gap-3">
+                    <FileText size={24} className="text-indigo-400" />
+                    <div className="text-left">
+                      <p className="text-sm font-bold text-white">{uploadFile.name}</p>
+                      <p className="text-xs text-slate-400">{(uploadFile.size / 1024).toFixed(1)} KB</p>
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {assignment.course_name && (
-                        <span className="text-xs text-slate-500">{assignment.course_name}</span>
-                      )}
-                      {assignment.due_date && (
-                        <span className="flex items-center gap-1 text-xs text-slate-500">
-                          <Clock size={12} />
-                          {new Date(assignment.due_date).toLocaleDateString("en-GB")}
-                        </span>
-                      )}
-                      <span className={clsx("text-xs px-2 py-0.5 rounded-full font-medium", priorityColors[assignment.priority])}>
-                        {assignment.priority}
-                      </span>
-                      <span className={clsx("text-xs px-2 py-0.5 rounded-full font-medium", statusColors[assignment.status])}>
-                        {assignment.status?.replace("_", " ")}
-                      </span>
-                      {assignment.question_pdf_1_name && assignment.question_pdf_1 && (
-                        <button
-                          onClick={() => openPdfInNewWindow(assignment.question_pdf_1!, assignment.question_pdf_1_name!)}
-                          className="flex items-center gap-1 text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full hover:bg-blue-100 transition-colors"
-                        >
-                          <FileText size={10} />
-                          {assignment.question_pdf_1_name}
-                          <ExternalLink size={9} />
-                        </button>
-                      )}
-                      {assignment.question_pdf_1_name && !assignment.question_pdf_1 && (
-                        <span className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
-                          <AlertCircle size={10} />
-                          📎 {assignment.question_pdf_1_name} — download from Classroom and upload here
-                        </span>
-                      )}
-                      {assignment.question_pdf_2_name && assignment.question_pdf_2 && (
-                        <button
-                          onClick={() => openPdfInNewWindow(assignment.question_pdf_2!, assignment.question_pdf_2_name!)}
-                          className="flex items-center gap-1 text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full hover:bg-purple-100 transition-colors"
-                        >
-                          <FileText size={10} />
-                          {assignment.question_pdf_2_name} (extended)
-                          <ExternalLink size={9} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
-                    {assignment.status !== "completed" && (
-                      <>
-                        {hasQuestion(assignment) && (
-                          <button
-                            onClick={() => setExpandedQuestionId(
-                              expandedQuestionId === assignment.id ? null : assignment.id
-                            )}
-                            className="flex items-center gap-1.5 text-xs bg-slate-50 text-slate-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
-                          >
-                            <Eye size={12} />
-                            {expandedQuestionId === assignment.id ? "Hide Question" : "View Question"}
-                          </button>
-                        )}
-
-                        {hasPendingPdf(assignment) && (
-                          <button
-                            onClick={() => setShowExtendForm(
-                              showExtendForm === assignment.id ? null : assignment.id
-                            )}
-                            className="flex items-center gap-1.5 text-xs bg-amber-50 text-amber-600 border border-amber-100 px-3 py-1.5 rounded-lg hover:bg-amber-100 transition-colors"
-                          >
-                            <Upload size={12} />
-                            Upload PDF to Solve
-                          </button>
-                        )}
-
-                        {!hasQuestion(assignment) && !hasPendingPdf(assignment) && (
-                          <button
-                            onClick={() => setShowExtendForm(
-                              showExtendForm === assignment.id ? null : assignment.id
-                            )}
-                            className="flex items-center gap-1.5 text-xs bg-slate-50 text-slate-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
-                          >
-                            <Upload size={12} />
-                            Upload Question
-                          </button>
-                        )}
-
-                        {hasQuestion(assignment) && (
-                          <button
-                            onClick={() => setShowExtendForm(
-                              showExtendForm === assignment.id ? null : assignment.id
-                            )}
-                            className="flex items-center gap-1.5 text-xs bg-purple-50 text-purple-600 border border-purple-100 px-3 py-1.5 rounded-lg hover:bg-purple-100 transition-colors"
-                          >
-                            <PlusCircle size={12} />
-                            Extend
-                          </button>
-                        )}
-
-                        {needsRegenerate(assignment) ? (
-                          <button
-                            onClick={() => handleSolve(assignment.id)}
-                            disabled={solvingId === assignment.id}
-                            className="flex items-center gap-1.5 text-xs bg-amber-50 text-amber-600 border border-amber-100 px-3 py-1.5 rounded-lg hover:bg-amber-100 transition-colors disabled:opacity-50"
-                          >
-                            {solvingId === assignment.id ? (
-                              <Loader2 size={12} className="animate-spin" />
-                            ) : (
-                              <RefreshCw size={12} />
-                            )}
-                            {solvingId === assignment.id ? "Generating..." : "Generate Solution"}
-                          </button>
-                        ) : assignment.solution ? (
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => setExpandedSolutionId(
-                                expandedSolutionId === assignment.id ? null : assignment.id
-                              )}
-                              className="flex items-center gap-1.5 text-xs bg-blue-50 text-blue-600 border border-blue-100 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors"
-                            >
-                              <Sparkles size={12} />
-                              {expandedSolutionId === assignment.id ? "Hide Solution" : "View Solution"}
-                              {expandedSolutionId === assignment.id ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                            </button>
-                            <button
-                              onClick={() => handleSolve(assignment.id)}
-                              disabled={solvingId === assignment.id}
-                              className="flex items-center gap-1 text-xs text-slate-400 border border-gray-200 px-2 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
-                              title="Regenerate solution"
-                            >
-                              {solvingId === assignment.id ? (
-                                <Loader2 size={12} className="animate-spin" />
-                              ) : (
-                                <RefreshCw size={12} />
-                              )}
-                            </button>
-                          </div>
-                        ) : (hasQuestion(assignment) || hasPendingPdf(assignment)) ? (
-                          <button
-                            onClick={() => handleSolve(assignment.id)}
-                            disabled={solvingId === assignment.id}
-                            className="flex items-center gap-1.5 text-xs bg-blue-50 text-blue-600 border border-blue-100 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
-                          >
-                            {solvingId === assignment.id ? (
-                              <Loader2 size={12} className="animate-spin" />
-                            ) : (
-                              <Sparkles size={12} />
-                            )}
-                            {solvingId === assignment.id ? "Solving..." : "Solve with AI"}
-                          </button>
-                        ) : null}
-
-                        <button
-                          onClick={() => handleComplete(assignment.id)}
-                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                          title="Mark complete — deletes PDFs permanently"
-                        >
-                          <CheckCircle size={18} />
-                        </button>
-                      </>
-                    )}
-
                     <button
-                      onClick={() => handleDelete(assignment.id)}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                      title={assignment.status === "completed"
-                        ? "Delete entry"
-                        : "Delete assignment and PDFs permanently"}
+                      onClick={(e) => { e.stopPropagation(); setUploadFile(null); }}
+                      className="ml-4 p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
                     >
-                      <Trash2 size={18} />
+                      <X size={16} />
                     </button>
                   </div>
-                </div>
-
-                {assignment.status !== "completed" && showExtendForm === assignment.id && (
-                  <div className="mt-4 border-t border-gray-100 pt-4">
-                    <p className="text-sm font-medium text-slate-700 mb-3">
-                      {hasPendingPdf(assignment)
-                        ? `Upload "${assignment.question_pdf_1_name}" from Classroom`
-                        : hasQuestion(assignment)
-                        ? "Add Extended Question"
-                        : "Upload Question"}
-                    </p>
-                    {!hasPendingPdf(assignment) && (
-                      <textarea
-                        placeholder="Type additional question text here..."
-                        value={extendText}
-                        onChange={(e) => setExtendText(e.target.value)}
-                        rows={2}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 mb-3"
-                      />
-                    )}
-                    <div
-                      onClick={() => extendFileRef.current?.click()}
-                      className="border-2 border-dashed border-gray-200 rounded-lg p-3 text-center cursor-pointer hover:border-slate-300 hover:bg-slate-50 transition-colors mb-3"
-                    >
-                      <input
-                        ref={extendFileRef}
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png,.webp"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) setExtendFile(file);
-                        }}
-                      />
-                      {extendFile ? (
-                        <div className="flex items-center justify-center gap-2">
-                          <FileText size={16} className="text-red-500" />
-                          <p className="text-sm text-slate-700">{extendFile.name}</p>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setExtendFile(null); }}
-                            className="text-slate-400 hover:text-red-500"
-                          >
-                            <X size={12} />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center gap-2 text-slate-400">
-                          <Upload size={14} />
-                          <p className="text-xs">
-                            {hasPendingPdf(assignment)
-                              ? `Upload ${assignment.question_pdf_1_name}`
-                              : "Upload PDF or Image"}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleExtend(assignment.id)}
-                        disabled={extendingId === assignment.id || (!extendText && !extendFile)}
-                        className="flex items-center gap-2 bg-slate-900 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-700 transition-colors disabled:opacity-50"
-                      >
-                        {extendingId === assignment.id && <Loader2 size={12} className="animate-spin" />}
-                        {extendingId === assignment.id ? "Saving..." : "Save"}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowExtendForm(null);
-                          setExtendText("");
-                          setExtendFile(null);
-                        }}
-                        className="border border-gray-200 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-50 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-2 text-slate-400 group-hover:text-indigo-300 transition-colors">
+                    <Upload size={24} className="mb-1" />
+                    <p className="text-sm font-medium">Click to browse or drag and drop</p>
+                    <p className="text-xs text-slate-500">PDF, JPG, PNG up to 10MB</p>
                   </div>
                 )}
               </div>
+            </div>
 
-              {expandedQuestionId === assignment.id && hasQuestion(assignment) && (
-                <div className="border-t border-gray-100 bg-slate-50 p-5">
-                  <p className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                    <Eye size={14} />
-                    Question
-                  </p>
-                  {assignment.question_text && (
-                    <div className="text-sm text-slate-600 whitespace-pre-wrap bg-white rounded-lg p-3 border border-gray-200 mb-2 max-h-64 overflow-auto">
-                      {assignment.question_text}
-                    </div>
-                  )}
-                  {assignment.question_pdf_1_name && assignment.question_pdf_1 && (
-                    <button
-                      onClick={() => openPdfInNewWindow(assignment.question_pdf_1!, assignment.question_pdf_1_name!)}
-                      className="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 px-3 py-2 rounded-lg mb-2 hover:bg-blue-100 transition-colors"
-                    >
-                      <FileText size={12} />
-                      <span>{assignment.question_pdf_1_name}</span>
-                      <ExternalLink size={10} />
-                      <span className="text-blue-400">Click to view</span>
-                    </button>
-                  )}
-                  {assignment.question_pdf_2_name && assignment.question_pdf_2 && (
-                    <button
-                      onClick={() => openPdfInNewWindow(assignment.question_pdf_2!, assignment.question_pdf_2_name!)}
-                      className="flex items-center gap-2 text-xs text-purple-600 bg-purple-50 px-3 py-2 rounded-lg hover:bg-purple-100 transition-colors"
-                    >
-                      <FileText size={12} />
-                      <span>{assignment.question_pdf_2_name} (extended)</span>
-                      <ExternalLink size={10} />
-                      <span className="text-purple-400">Click to view</span>
-                    </button>
-                  )}
-                </div>
-              )}
+            <div className="flex items-center gap-3 mt-6 pt-6 border-t border-slate-800">
+              <button
+                onClick={handleAdd}
+                disabled={saving}
+                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving && <Loader2 size={16} className="animate-spin" />}
+                {saving
+                  ? (form.question_text || uploadFile ? "Saving & Solving..." : "Saving...")
+                  : "Save Assignment"}
+              </button>
+              <button
+                onClick={() => { setShowForm(false); setUploadFile(null); }}
+                className="border border-slate-700 text-slate-300 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
 
-              {expandedSolutionId === assignment.id && assignment.solution && (
-                <div className="border-t border-gray-100 bg-slate-50 p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                      <Sparkles size={14} className="text-blue-600" />
-                      AI Solution
-                    </p>
-                    {assignment.previous_solution && (
-                      <button
-                        onClick={() => setShowPrevSolution(
-                          showPrevSolution === assignment.id ? null : assignment.id
+        {/* Main Content Area */}
+        {loading ? (
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-16 text-center shadow-lg">
+            <Loader2 size={40} className="mx-auto text-indigo-500 animate-spin mb-4" />
+            <p className="text-slate-400 font-medium">Fetching assignments...</p>
+          </div>
+        ) : assignments.length === 0 ? (
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-16 text-center shadow-lg">
+            <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-5">
+              <BookOpen size={32} className="text-slate-500" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">No assignments yet</h3>
+            <p className="text-slate-400">Add your first assignment to start crushing your goals.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {assignments.map((assignment) => (
+              <div key={assignment.id} className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg hover:border-slate-700 transition-all duration-300">
+                <div className="p-5 sm:p-6">
+                  
+                  <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
+                    {/* Info Section */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 flex-wrap mb-2">
+                        <h3 className={clsx(
+                          "text-lg font-bold tracking-wide",
+                          assignment.status === "completed" ? "line-through text-slate-500" : "text-white"
+                        )}>
+                          {assignment.title}
+                        </h3>
+                        {assignment.source === "google_classroom" && (
+                          <span className="text-[10px] px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold uppercase tracking-wider">
+                            Classroom
+                          </span>
                         )}
-                        className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600"
+                      </div>
+                      
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        {assignment.course_name && (
+                          <span className="text-sm font-medium text-slate-400">{assignment.course_name}</span>
+                        )}
+                        {assignment.course_name && assignment.due_date && (
+                          <span className="text-slate-600">•</span>
+                        )}
+                        {assignment.due_date && (
+                          <span className="flex items-center gap-1.5 text-sm font-medium text-slate-400">
+                            <Clock size={14} className="text-slate-500" />
+                            {new Date(assignment.due_date).toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                        )}
+                        <span className="text-slate-600 ml-1 mr-1">•</span>
+                        <span className={clsx("text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider", priorityColors[assignment.priority])}>
+                          {assignment.priority}
+                        </span>
+                        <span className={clsx("text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider", statusColors[assignment.status])}>
+                          {assignment.status?.replace("_", " ")}
+                        </span>
+                      </div>
+
+                      {/* PDF Links Section */}
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {assignment.question_pdf_1_name && assignment.question_pdf_1 && (
+                          <button
+                            onClick={() => openPdfInNewWindow(assignment.question_pdf_1!, assignment.question_pdf_1_name!)}
+                            className="flex items-center gap-1.5 text-xs font-medium text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1.5 rounded-lg hover:bg-indigo-500/20 transition-colors"
+                          >
+                            <FileText size={12} />
+                            {assignment.question_pdf_1_name}
+                            <ExternalLink size={10} className="ml-1 opacity-70" />
+                          </button>
+                        )}
+                        {assignment.question_pdf_1_name && !assignment.question_pdf_1 && (
+                          <span className="flex items-center gap-1.5 text-xs font-medium text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-lg">
+                            <AlertCircle size={12} />
+                            Missing PDF: {assignment.question_pdf_1_name}
+                          </span>
+                        )}
+                        {assignment.question_pdf_2_name && assignment.question_pdf_2 && (
+                          <button
+                            onClick={() => openPdfInNewWindow(assignment.question_pdf_2!, assignment.question_pdf_2_name!)}
+                            className="flex items-center gap-1.5 text-xs font-medium text-violet-400 bg-violet-500/10 border border-violet-500/20 px-3 py-1.5 rounded-lg hover:bg-violet-500/20 transition-colors"
+                          >
+                            <FileText size={12} />
+                            {assignment.question_pdf_2_name} (Extended)
+                            <ExternalLink size={10} className="ml-1 opacity-70" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Actions Row */}
+                    <div className="flex items-center gap-2 flex-shrink-0 flex-wrap lg:justify-end mt-4 lg:mt-0">
+                      {assignment.status !== "completed" && (
+                        <>
+                          {hasQuestion(assignment) && (
+                            <button
+                              onClick={() => setExpandedQuestionId(expandedQuestionId === assignment.id ? null : assignment.id)}
+                              className="flex items-center gap-1.5 text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl hover:bg-slate-700 transition-colors"
+                            >
+                              <Eye size={14} />
+                              {expandedQuestionId === assignment.id ? "Hide Q" : "View Q"}
+                            </button>
+                          )}
+
+                          {hasPendingPdf(assignment) && (
+                            <button
+                              onClick={() => setShowExtendForm(showExtendForm === assignment.id ? null : assignment.id)}
+                              className="flex items-center gap-1.5 text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 px-3 py-2 rounded-xl hover:bg-amber-500/20 transition-colors shadow-[0_0_10px_rgba(245,158,11,0.1)]"
+                            >
+                              <Upload size={14} /> Upload PDF
+                            </button>
+                          )}
+
+                          {!hasQuestion(assignment) && !hasPendingPdf(assignment) && (
+                            <button
+                              onClick={() => setShowExtendForm(showExtendForm === assignment.id ? null : assignment.id)}
+                              className="flex items-center gap-1.5 text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl hover:bg-slate-700 transition-colors"
+                            >
+                              <Upload size={14} /> Add Q
+                            </button>
+                          )}
+
+                          {hasQuestion(assignment) && (
+                            <button
+                              onClick={() => setShowExtendForm(showExtendForm === assignment.id ? null : assignment.id)}
+                              className="flex items-center gap-1.5 text-xs font-bold bg-violet-500/10 text-violet-400 border border-violet-500/30 px-3 py-2 rounded-xl hover:bg-violet-500/20 transition-colors"
+                            >
+                              <PlusCircle size={14} /> Extend
+                            </button>
+                          )}
+
+                          {needsRegenerate(assignment) ? (
+                            <button
+                              onClick={() => handleSolve(assignment.id)}
+                              disabled={solvingId === assignment.id}
+                              className="flex items-center gap-1.5 text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 px-3 py-2 rounded-xl hover:bg-amber-500/20 transition-colors disabled:opacity-50"
+                            >
+                              {solvingId === assignment.id ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                              {solvingId === assignment.id ? "Generating..." : "Generate"}
+                            </button>
+                          ) : assignment.solution ? (
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => setExpandedSolutionId(expandedSolutionId === assignment.id ? null : assignment.id)}
+                                className="flex items-center gap-1.5 text-xs font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 px-3 py-2 rounded-xl hover:bg-indigo-500/20 transition-colors shadow-[0_0_10px_rgba(99,102,241,0.15)]"
+                              >
+                                <Sparkles size={14} />
+                                {expandedSolutionId === assignment.id ? "Hide Sol" : "View Sol"}
+                                {expandedSolutionId === assignment.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                              </button>
+                              <button
+                                onClick={() => handleSolve(assignment.id)}
+                                disabled={solvingId === assignment.id}
+                                className="p-2 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-xl transition-colors disabled:opacity-50"
+                                title="Regenerate solution"
+                              >
+                                {solvingId === assignment.id ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+                              </button>
+                            </div>
+                          ) : (hasQuestion(assignment) || hasPendingPdf(assignment)) ? (
+                            <button
+                              onClick={() => handleSolve(assignment.id)}
+                              disabled={solvingId === assignment.id}
+                              className="flex items-center gap-1.5 text-xs font-bold bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-500 shadow-[0_0_15px_rgba(79,70,229,0.3)] transition-all disabled:opacity-50"
+                            >
+                              {solvingId === assignment.id ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                              {solvingId === assignment.id ? "Solving..." : "Solve"}
+                            </button>
+                          ) : null}
+
+                          <button
+                            onClick={() => handleComplete(assignment.id)}
+                            className="p-2 text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-xl transition-all"
+                            title="Mark complete"
+                          >
+                            <CheckCircle size={20} />
+                          </button>
+                        </>
+                      )}
+
+                      <button
+                        onClick={() => handleDelete(assignment.id)}
+                        className="p-2 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all"
+                        title="Delete assignment"
                       >
-                        <History size={12} />
-                        {showPrevSolution === assignment.id ? "Hide" : "View"} Previous Solution
+                        <Trash2 size={20} />
                       </button>
-                    )}
+                    </div>
                   </div>
-                  <div className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed max-h-96 overflow-auto bg-white rounded-lg p-4 border border-gray-200">
-                    {assignment.solution}
-                  </div>
-                  {showPrevSolution === assignment.id && assignment.previous_solution && (
-                    <div className="mt-4">
-                      <p className="text-xs font-medium text-slate-500 mb-2 flex items-center gap-1">
-                        <History size={12} />
-                        Previous Solution
+
+                  {/* Extend/Upload Inline Form */}
+                  {assignment.status !== "completed" && showExtendForm === assignment.id && (
+                    <div className="mt-6 border-t border-slate-800 pt-5 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <p className="text-sm font-bold text-slate-300 mb-3">
+                        {hasPendingPdf(assignment)
+                          ? `Upload missing "${assignment.question_pdf_1_name}"`
+                          : hasQuestion(assignment)
+                          ? "Append to current question"
+                          : "Upload new question"}
                       </p>
-                      <div className="text-sm text-slate-500 whitespace-pre-wrap leading-relaxed max-h-64 overflow-auto bg-white rounded-lg p-4 border border-gray-200 opacity-75">
-                        {assignment.previous_solution}
+                      
+                      {!hasPendingPdf(assignment) && (
+                        <textarea
+                          placeholder="Type additional context or questions here..."
+                          value={extendText}
+                          onChange={(e) => setExtendText(e.target.value)}
+                          rows={2}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-slate-200 placeholder-slate-600 transition-colors mb-3"
+                        />
+                      )}
+                      
+                      <div
+                        onClick={() => extendFileRef.current?.click()}
+                        className="border-2 border-dashed border-slate-700 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-500/50 hover:bg-slate-800/50 transition-colors mb-4 group"
+                      >
+                        <input
+                          ref={extendFileRef}
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png,.webp"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) setExtendFile(file);
+                          }}
+                        />
+                        {extendFile ? (
+                          <div className="flex items-center justify-center gap-3">
+                            <FileText size={20} className="text-indigo-400" />
+                            <p className="text-sm font-bold text-white">{extendFile.name}</p>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setExtendFile(null); }}
+                              className="p-1 rounded text-slate-400 hover:text-rose-400 hover:bg-rose-500/10"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center gap-2 text-slate-400 group-hover:text-indigo-300 transition-colors">
+                            <Upload size={16} />
+                            <p className="text-sm font-medium">
+                              {hasPendingPdf(assignment) ? "Select PDF from device" : "Upload attachment (optional)"}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => handleExtend(assignment.id)}
+                          disabled={extendingId === assignment.id || (!extendText && !extendFile)}
+                          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors disabled:opacity-50"
+                        >
+                          {extendingId === assignment.id && <Loader2 size={14} className="animate-spin" />}
+                          {extendingId === assignment.id ? "Saving..." : "Save Update"}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowExtendForm(null);
+                            setExtendText("");
+                            setExtendFile(null);
+                          }}
+                          className="border border-slate-700 text-slate-300 px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-colors"
+                        >
+                          Cancel
+                        </button>
                       </div>
                     </div>
                   )}
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+
+                {/* Expanded Question Section */}
+                {expandedQuestionId === assignment.id && hasQuestion(assignment) && (
+                  <div className="border-t border-slate-800 bg-slate-950/50 p-5 sm:p-6">
+                    <p className="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2 uppercase tracking-wide">
+                      <Eye size={16} className="text-slate-500" />
+                      Original Question
+                    </p>
+                    {assignment.question_text && (
+                      <div className="text-sm text-slate-300 whitespace-pre-wrap bg-slate-900 rounded-xl p-5 border border-slate-800 mb-3 max-h-72 overflow-y-auto custom-scrollbar leading-relaxed">
+                        {assignment.question_text}
+                      </div>
+                    )}
+                    <div className="flex flex-wrap gap-2">
+                      {assignment.question_pdf_1_name && assignment.question_pdf_1 && (
+                        <button
+                          onClick={() => openPdfInNewWindow(assignment.question_pdf_1!, assignment.question_pdf_1_name!)}
+                          className="flex items-center gap-2 text-sm font-medium text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-4 py-2.5 rounded-xl hover:bg-indigo-500/20 transition-all shadow-sm"
+                        >
+                          <FileText size={16} />
+                          <span>{assignment.question_pdf_1_name}</span>
+                          <ExternalLink size={14} className="opacity-70 ml-1" />
+                        </button>
+                      )}
+                      {assignment.question_pdf_2_name && assignment.question_pdf_2 && (
+                        <button
+                          onClick={() => openPdfInNewWindow(assignment.question_pdf_2!, assignment.question_pdf_2_name!)}
+                          className="flex items-center gap-2 text-sm font-medium text-violet-400 bg-violet-500/10 border border-violet-500/20 px-4 py-2.5 rounded-xl hover:bg-violet-500/20 transition-all shadow-sm"
+                        >
+                          <FileText size={16} />
+                          <span>{assignment.question_pdf_2_name} <span className="opacity-75">(Extended)</span></span>
+                          <ExternalLink size={14} className="opacity-70 ml-1" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Expanded Solution Section */}
+                {expandedSolutionId === assignment.id && assignment.solution && (
+                  <div className="border-t border-slate-800 bg-slate-950/80 p-5 sm:p-6 relative overflow-hidden">
+                    {/* Background Glow */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[100px] pointer-events-none"></div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 relative z-10">
+                      <p className="text-sm font-bold text-indigo-300 flex items-center gap-2 uppercase tracking-wide">
+                        <Sparkles size={16} className="text-indigo-400" />
+                        AI Generated Solution
+                      </p>
+                      {assignment.previous_solution && (
+                        <button
+                          onClick={() => setShowPrevSolution(showPrevSolution === assignment.id ? null : assignment.id)}
+                          className="flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-slate-200 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          <History size={14} />
+                          {showPrevSolution === assignment.id ? "Hide History" : "View History"}
+                        </button>
+                      )}
+                    </div>
+                    
+                    <div className="relative z-10 text-sm text-slate-200 whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto bg-slate-900 rounded-xl p-5 border border-slate-800 shadow-inner custom-scrollbar selection:bg-indigo-500/30">
+                      {assignment.solution}
+                    </div>
+                    
+                    {showPrevSolution === assignment.id && assignment.previous_solution && (
+                      <div className="mt-5 relative z-10 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <p className="text-xs font-bold text-slate-500 mb-3 flex items-center gap-1.5 uppercase tracking-wide">
+                          <History size={14} />
+                          Previous Revision
+                        </p>
+                        <div className="text-sm text-slate-400 whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto bg-slate-950 rounded-xl p-5 border border-slate-800/50 custom-scrollbar opacity-80">
+                          {assignment.previous_solution}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
