@@ -329,7 +329,7 @@ export default function AssistantPage() {
           <p className="text-slate-400 mt-1.5 text-sm font-medium">Ask me anything academic — explanations, quizzes, flashcards, summaries.</p>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 relative z-10 custom-scrollbar scroll-smooth">
+        <div className="flex-1 overflow-y-auto p-6 space-y-8 relative z-10 custom-scrollbar scroll-smooth">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -340,21 +340,21 @@ export default function AssistantPage() {
             >
               <div
                 className={clsx(
-                  "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg",
+                  "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg",
                   message.role === "user" 
                     ? "bg-gradient-to-br from-indigo-500 to-indigo-700 text-white" 
                     : "bg-slate-800 border border-slate-700 text-violet-400"
                 )}
               >
-                {message.role === "user" ? <User size={20} /> : <Bot size={20} />}
+                {message.role === "user" ? <User size={24} /> : <Bot size={24} />}
               </div>
               <div
                 className={clsx(
-                  "max-w-[80%] rounded-2xl px-5 py-4 text-sm leading-relaxed whitespace-pre-wrap shadow-sm",
+                  "max-w-[85%] xl:max-w-4xl rounded-3xl px-6 py-5 text-base leading-7 whitespace-pre-wrap shadow-sm",
                   message.role === "user"
                     ? "bg-indigo-600 text-white rounded-tr-sm"
                     : "bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-sm",
-                  message.content === "" && message.role === "assistant" && "animate-pulse min-h-[40px] min-w-[40px]"
+                  message.content === "" && message.role === "assistant" && "animate-pulse min-h-[60px] min-w-[60px]"
                 )}
               >
                 {message.content}
@@ -364,15 +364,15 @@ export default function AssistantPage() {
 
           {loading && (
             <div className="flex items-start gap-4 animate-in fade-in duration-300">
-              <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 text-violet-400 flex items-center justify-center shrink-0 shadow-lg relative overflow-hidden">
+              <div className="w-12 h-12 rounded-2xl bg-slate-800 border border-slate-700 text-violet-400 flex items-center justify-center shrink-0 shadow-lg relative overflow-hidden">
                 <div className="absolute inset-0 bg-violet-400/20 animate-pulse"></div>
-                <Bot size={20} className="relative z-10" />
+                <Bot size={24} className="relative z-10" />
               </div>
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-sm px-5 py-4 flex items-center gap-2">
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl rounded-tl-sm px-6 py-5 flex items-center gap-2 min-h-[60px]">
                 <div className="flex gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-violet-400/60 animate-bounce" style={{ animationDelay: "0ms" }}></div>
-                  <div className="w-2 h-2 rounded-full bg-violet-400/60 animate-bounce" style={{ animationDelay: "150ms" }}></div>
-                  <div className="w-2 h-2 rounded-full bg-violet-400/60 animate-bounce" style={{ animationDelay: "300ms" }}></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-violet-400/60 animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-violet-400/60 animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-violet-400/60 animate-bounce" style={{ animationDelay: "300ms" }}></div>
                 </div>
               </div>
             </div>
@@ -381,15 +381,15 @@ export default function AssistantPage() {
         </div>
 
         {/* Input Area */}
-        <div className="p-6 pt-2 bg-slate-950/80 backdrop-blur-md border-t border-slate-800 relative z-10">
+        <div className="p-6 pt-3 bg-slate-950/80 backdrop-blur-md border-t border-slate-800 relative z-10">
           <div className="flex flex-wrap gap-2 mb-4">
             {suggestions.map((suggestion) => (
               <button
                 key={suggestion}
                 onClick={() => sendMessage(suggestion)}
-                className="flex items-center gap-1.5 text-xs font-medium bg-slate-900 border border-slate-800 text-slate-300 px-4 py-2 rounded-full hover:bg-indigo-500/10 hover:border-indigo-500/30 hover:text-indigo-300 transition-all"
+                className="flex items-center gap-1.5 text-sm font-medium bg-slate-900 border border-slate-800 text-slate-300 px-4 py-2 rounded-full hover:bg-indigo-500/10 hover:border-indigo-500/30 hover:text-indigo-300 transition-all"
               >
-                <Sparkles size={12} className="text-indigo-400" />
+                <Sparkles size={14} className="text-indigo-400" />
                 {suggestion}
               </button>
             ))}
@@ -402,14 +402,14 @@ export default function AssistantPage() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}
               placeholder="Ask me anything academic..."
-              className="flex-1 bg-slate-900 border border-slate-800 rounded-2xl pl-5 pr-14 py-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent transition-all shadow-inner"
+              className="flex-1 bg-slate-900 border border-slate-800 rounded-2xl pl-5 pr-16 py-4 text-base text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent transition-all shadow-inner"
             />
             <button
               onClick={() => sendMessage()}
               disabled={loading || !input.trim()}
               className="absolute right-2 top-2 bottom-2 aspect-square flex items-center justify-center bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 transition-all disabled:opacity-50 disabled:hover:bg-indigo-600 disabled:cursor-not-allowed shadow-md"
             >
-              <Send size={18} className={input.trim() && !loading ? "translate-x-0.5 -translate-y-0.5 transition-transform" : ""} />
+              <Send size={20} className={input.trim() && !loading ? "translate-x-0.5 -translate-y-0.5 transition-transform" : ""} />
             </button>
           </div>
         </div>
