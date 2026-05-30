@@ -14,7 +14,8 @@ export default function Home() {
       while (isMounted) {
         try {
           const res = await fetch(
-            "https://studyflow-ai-874f.onrender.com/health"
+            //"https://studyflow-ai-874f.onrender.com/health"
+            "https://studyflow-ai-zaif.onrender.com/health"
           );
 
           if (res.ok) {
