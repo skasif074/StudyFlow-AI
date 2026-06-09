@@ -69,11 +69,11 @@ export default function Home() {
 
         {/* Typography */}
         <h1 className="text-2xl font-extrabold tracking-tight text-white mb-3 text-center">
-          Waking up <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">AI Core</span>
+          Waking up <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">System Core</span>
         </h1>
         
         <p className="text-sm font-medium text-slate-400 text-center leading-relaxed">
-          Establishing a secure connection to the neural network. This might take a few seconds on the first load.
+          Establishing a secure connection... Please StandBy. This might take a few seconds on the first load  --Sk Asif (Developer).
         </p>
 
         {/* Status Indicator */}
