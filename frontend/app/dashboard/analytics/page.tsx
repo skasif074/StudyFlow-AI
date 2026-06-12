@@ -185,7 +185,7 @@ export default function AnalyticsPage() {
                     <Legend 
                       verticalAlign="bottom" 
                       height={36} 
-                      wrapperStyle={{ color: '#94a3b8', fontSize: '12px', sm: {fontSize: '14px'}, fontWeight: 500 }}
+                      wrapperStyle={{ color: '#94a3b8', fontSize: '13px', fontWeight: 500 }}
                       iconType="circle"
                     />
                   </PieChart>
