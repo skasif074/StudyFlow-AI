@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { Bot, Send, User, Loader2, Sparkles, Plus, Trash2, Clock } from "lucide-react";
+import { Bot, Send, User, Loader2, Sparkles, Plus, Trash2, Clock, Menu, X } from "lucide-react";
 import { clsx } from "clsx";
 
 interface Message {
@@ -39,6 +39,10 @@ export default function AssistantPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingSessions, setLoadingSessions] = useState(true);
+  
+  // Mobile history drawer state
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when messages update
@@ -52,7 +56,10 @@ export default function AssistantPage() {
 
   const fetchSessions = async () => {
     const token = getToken();
-    if (!token) return;
+    if (!token) {
+      setLoadingSessions(false);
+      return;
+    }
     try {
       const response = await fetch(`${API_URL}/chat/sessions`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -67,6 +74,7 @@ export default function AssistantPage() {
   };
 
   const loadSession = async (sessionId: string) => {
+    setIsHistoryOpen(false); // Close sidebar on mobile after selection
     const token = getToken();
     if (!token) return;
     try {
@@ -95,6 +103,7 @@ export default function AssistantPage() {
         content: "Hi! I'm your AI academic assistant. What would you like help with today?",
       },
     ]);
+    setIsHistoryOpen(false); // Close sidebar on mobile
   };
 
   const deleteSession = async (sessionId: string) => {
@@ -168,7 +177,7 @@ export default function AssistantPage() {
             { role: "user", content: messageText },
           ],
           max_tokens: 1000,
-          stream: true, // Enable streaming
+          stream: true,
         }),
       });
 
@@ -238,17 +247,35 @@ export default function AssistantPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] lg:h-screen bg-slate-950 text-slate-200 selection:bg-indigo-500/30 overflow-hidden">
+    <div className="flex h-full min-h-[calc(100vh-4rem)] lg:h-screen bg-slate-950 text-slate-200 selection:bg-indigo-500/30 overflow-hidden relative">
       
+      {/* Mobile Drawer Overlay */}
+      {isHistoryOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+          onClick={() => setIsHistoryOpen(false)}
+        />
+      )}
+
       {/* Sidebar - History */}
-      <aside className="w-72 bg-slate-950 border-r border-slate-800 flex flex-col flex-shrink-0 relative z-20">
-        <div className="p-5 border-b border-slate-800">
+      <aside className={clsx(
+        "absolute inset-y-0 left-0 z-50 w-72 bg-slate-950 border-r border-slate-800 flex flex-col flex-shrink-0 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 lg:z-20",
+        isHistoryOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <div className="p-4 lg:p-5 border-b border-slate-800 flex items-center justify-between">
           <button
             onClick={newChat}
-            className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-3 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(79,70,229,0.2)] hover:shadow-[0_0_20px_rgba(79,70,229,0.4)]"
+            className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-3 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(79,70,229,0.2)] hover:shadow-[0_0_20px_rgba(79,70,229,0.4)]"
           >
             <Plus size={18} />
-            New Chat Session
+            New Chat
+          </button>
+          {/* Close button for mobile inside drawer */}
+          <button 
+            className="ml-3 lg:hidden p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-900 transition-colors"
+            onClick={() => setIsHistoryOpen(false)}
+          >
+            <X size={20} />
           </button>
         </div>
         
@@ -300,10 +327,10 @@ export default function AssistantPage() {
                     e.stopPropagation();
                     deleteSession(session.session_id);
                   }}
-                  className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-all"
+                  className="opacity-0 lg:opacity-0 group-hover:opacity-100 p-1.5 rounded-md text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-all focus:opacity-100 touch-manipulation"
                   title="Delete session"
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={16} />
                 </button>
               </div>
             ))
@@ -315,46 +342,59 @@ export default function AssistantPage() {
       </aside>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col relative bg-slate-950">
+      <div className="flex-1 flex flex-col relative bg-slate-950 min-w-0">
         
         {/* Background glow effects */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-violet-500/5 blur-[120px] pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-violet-500/5 blur-[80px] md:blur-[120px] pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-indigo-500/5 blur-[80px] md:blur-[120px] pointer-events-none"></div>
 
-        <div className="p-6 pb-4 border-b border-slate-800 bg-slate-950/80 backdrop-blur-md relative z-10">
-          <h2 className="text-2xl font-extrabold tracking-tight text-white flex items-center gap-2">
-            <Sparkles size={24} className="text-violet-400" />
-            AI <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">Assistant</span>
-          </h2>
-          <p className="text-slate-400 mt-1.5 text-sm font-medium">Ask me anything academic — explanations, quizzes, flashcards, summaries.</p>
+        {/* Mobile + Desktop Header */}
+        <div className="p-4 lg:p-6 pb-4 border-b border-slate-800 bg-slate-950/90 backdrop-blur-md relative z-10 flex flex-col justify-center">
+          <div className="flex items-center gap-3 mb-1">
+             <button
+                className="lg:hidden p-2 -ml-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-900 transition-colors"
+                onClick={() => setIsHistoryOpen(true)}
+              >
+                <Menu size={22} />
+              </button>
+            <h2 className="text-xl lg:text-2xl font-extrabold tracking-tight text-white flex items-center gap-2">
+              <Sparkles size={20} className="text-violet-400 hidden lg:block" />
+              AI <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">Assistant</span>
+            </h2>
+          </div>
+          <p className="text-slate-400 text-xs lg:text-sm font-medium ml-10 lg:ml-0 hidden sm:block">
+            Ask me anything academic — explanations, quizzes, flashcards, summaries.
+          </p>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-8 relative z-10 custom-scrollbar scroll-smooth">
+        {/* Chat Messages */}
+        <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6 lg:space-y-8 relative z-10 custom-scrollbar scroll-smooth">
           {messages.map((message) => (
             <div
               key={message.id}
               className={clsx(
-                "flex items-start gap-4",
+                "flex items-end lg:items-start gap-3 lg:gap-4",
                 message.role === "user" ? "flex-row-reverse" : "flex-row"
               )}
             >
               <div
                 className={clsx(
-                  "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg",
+                  "w-8 h-8 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl flex items-center justify-center shrink-0 shadow-lg",
                   message.role === "user" 
                     ? "bg-gradient-to-br from-indigo-500 to-indigo-700 text-white" 
                     : "bg-slate-800 border border-slate-700 text-violet-400"
                 )}
               >
-                {message.role === "user" ? <User size={24} /> : <Bot size={24} />}
+                {message.role === "user" ? <User size={18} className="lg:hidden" /> : <Bot size={18} className="lg:hidden" />}
+                {message.role === "user" ? <User size={24} className="hidden lg:block" /> : <Bot size={24} className="hidden lg:block" />}
               </div>
               <div
                 className={clsx(
-                  "max-w-[85%] xl:max-w-4xl rounded-3xl px-6 py-5 text-base leading-7 whitespace-pre-wrap shadow-sm",
+                  "max-w-[85%] lg:max-w-3xl xl:max-w-4xl rounded-2xl lg:rounded-3xl px-4 py-3 lg:px-6 lg:py-5 text-sm lg:text-base leading-relaxed lg:leading-7 whitespace-pre-wrap shadow-sm",
                   message.role === "user"
-                    ? "bg-indigo-600 text-white rounded-tr-sm"
-                    : "bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-sm",
-                  message.content === "" && message.role === "assistant" && "animate-pulse min-h-[60px] min-w-[60px]"
+                    ? "bg-indigo-600 text-white rounded-br-sm lg:rounded-tr-sm lg:rounded-br-2xl"
+                    : "bg-slate-900 border border-slate-800 text-slate-200 rounded-bl-sm lg:rounded-tl-sm lg:rounded-bl-2xl",
+                  message.content === "" && message.role === "assistant" && "animate-pulse min-h-[44px] lg:min-h-[60px] min-w-[60px]"
                 )}
               >
                 {message.content}
@@ -363,16 +403,17 @@ export default function AssistantPage() {
           ))}
 
           {loading && (
-            <div className="flex items-start gap-4 animate-in fade-in duration-300">
-              <div className="w-12 h-12 rounded-2xl bg-slate-800 border border-slate-700 text-violet-400 flex items-center justify-center shrink-0 shadow-lg relative overflow-hidden">
+            <div className="flex items-end lg:items-start gap-3 lg:gap-4 animate-in fade-in duration-300">
+              <div className="w-8 h-8 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl bg-slate-800 border border-slate-700 text-violet-400 flex items-center justify-center shrink-0 shadow-lg relative overflow-hidden">
                 <div className="absolute inset-0 bg-violet-400/20 animate-pulse"></div>
-                <Bot size={24} className="relative z-10" />
+                <Bot size={18} className="relative z-10 lg:hidden" />
+                <Bot size={24} className="relative z-10 hidden lg:block" />
               </div>
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl rounded-tl-sm px-6 py-5 flex items-center gap-2 min-h-[60px]">
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl lg:rounded-3xl rounded-bl-sm lg:rounded-tl-sm lg:rounded-bl-2xl px-4 py-3 lg:px-6 lg:py-5 flex items-center gap-2 min-h-[44px] lg:min-h-[60px]">
                 <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-violet-400/60 animate-bounce" style={{ animationDelay: "0ms" }}></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-violet-400/60 animate-bounce" style={{ animationDelay: "150ms" }}></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-violet-400/60 animate-bounce" style={{ animationDelay: "300ms" }}></div>
+                  <div className="w-2 lg:w-2.5 h-2 lg:h-2.5 rounded-full bg-violet-400/60 animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                  <div className="w-2 lg:w-2.5 h-2 lg:h-2.5 rounded-full bg-violet-400/60 animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                  <div className="w-2 lg:w-2.5 h-2 lg:h-2.5 rounded-full bg-violet-400/60 animate-bounce" style={{ animationDelay: "300ms" }}></div>
                 </div>
               </div>
             </div>
@@ -381,35 +422,37 @@ export default function AssistantPage() {
         </div>
 
         {/* Input Area */}
-        <div className="p-6 pt-3 bg-slate-950/80 backdrop-blur-md border-t border-slate-800 relative z-10">
-          <div className="flex flex-wrap gap-2 mb-4">
+        <div className="p-3 lg:p-6 pt-3 bg-slate-950/90 backdrop-blur-md border-t border-slate-800 relative z-10 pb-6 lg:pb-6">
+          
+          {/* Scrollable Suggestions for Mobile */}
+          <div className="flex overflow-x-auto pb-3 mb-2 lg:mb-4 lg:flex-wrap gap-2 lg:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {suggestions.map((suggestion) => (
               <button
                 key={suggestion}
                 onClick={() => sendMessage(suggestion)}
-                className="flex items-center gap-1.5 text-sm font-medium bg-slate-900 border border-slate-800 text-slate-300 px-4 py-2 rounded-full hover:bg-indigo-500/10 hover:border-indigo-500/30 hover:text-indigo-300 transition-all"
+                className="flex items-center gap-1.5 text-xs lg:text-sm font-medium bg-slate-900 border border-slate-800 text-slate-300 px-3 lg:px-4 py-1.5 lg:py-2 rounded-full hover:bg-indigo-500/10 hover:border-indigo-500/30 hover:text-indigo-300 transition-all whitespace-nowrap shrink-0"
               >
-                <Sparkles size={14} className="text-indigo-400" />
+                <Sparkles size={12} className="text-indigo-400 lg:w-[14px] lg:h-[14px]" />
                 {suggestion}
               </button>
             ))}
           </div>
 
-          <div className="flex gap-3 relative">
+          <div className="flex gap-2 lg:gap-3 relative">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-              placeholder="Ask me anything academic..."
-              className="flex-1 bg-slate-900 border border-slate-800 rounded-2xl pl-5 pr-16 py-4 text-base text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent transition-all shadow-inner"
+              placeholder="Ask me anything..."
+              className="flex-1 bg-slate-900 border border-slate-800 rounded-xl lg:rounded-2xl pl-4 lg:pl-5 pr-12 lg:pr-16 py-3 lg:py-4 text-sm lg:text-base text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent transition-all shadow-inner"
             />
             <button
               onClick={() => sendMessage()}
               disabled={loading || !input.trim()}
-              className="absolute right-2 top-2 bottom-2 aspect-square flex items-center justify-center bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 transition-all disabled:opacity-50 disabled:hover:bg-indigo-600 disabled:cursor-not-allowed shadow-md"
+              className="absolute right-1.5 lg:right-2 top-1.5 lg:top-2 bottom-1.5 lg:bottom-2 aspect-square flex items-center justify-center bg-indigo-600 text-white rounded-lg lg:rounded-xl hover:bg-indigo-500 transition-all disabled:opacity-50 disabled:hover:bg-indigo-600 disabled:cursor-not-allowed shadow-md"
             >
-              <Send size={20} className={input.trim() && !loading ? "translate-x-0.5 -translate-y-0.5 transition-transform" : ""} />
+              <Send size={18} className={clsx("lg:w-5 lg:h-5", input.trim() && !loading ? "translate-x-0.5 -translate-y-0.5 transition-transform" : "")} />
             </button>
           </div>
         </div>
