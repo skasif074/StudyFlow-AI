@@ -247,7 +247,8 @@ export default function AssistantPage() {
   };
 
   return (
-    <div className="flex h-full min-h-[calc(100vh-4rem)] lg:h-screen bg-slate-950 text-slate-200 selection:bg-indigo-500/30 overflow-hidden relative">
+    // Changed h-full/min-h to 100dvh for mobile keyboard support
+    <div className="flex h-[100dvh] w-full bg-slate-950 text-slate-200 selection:bg-indigo-500/30 overflow-hidden relative">
       
       {/* Mobile Drawer Overlay */}
       {isHistoryOpen && (
@@ -444,6 +445,12 @@ export default function AssistantPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+              onFocus={(e) => {
+                // Fallback: forces mobile browsers to scroll the input into view when the keyboard opens
+                setTimeout(() => {
+                  e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+              }}
               placeholder="Ask me anything..."
               className="flex-1 bg-slate-900 border border-slate-800 rounded-xl lg:rounded-2xl pl-4 lg:pl-5 pr-12 lg:pr-16 py-3 lg:py-4 text-sm lg:text-base text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent transition-all shadow-inner"
             />
