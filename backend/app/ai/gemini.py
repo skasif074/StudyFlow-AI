@@ -4,9 +4,17 @@ import os
 
 load_dotenv()
 
+#def get_gemini():
+#    return ChatGroq(
+#        model="llama-3.3-70b-versatile",
+#        api_key=os.getenv("GROQ_API_KEY"),
+#        temperature=0.7
+#    )
+
+
 def get_gemini():
     return ChatGroq(
-        model="llama-3.3-70b-versatile",
+        model="openai/gpt-oss-120b",
         api_key=os.getenv("GROQ_API_KEY"),
         temperature=0.7
     )
