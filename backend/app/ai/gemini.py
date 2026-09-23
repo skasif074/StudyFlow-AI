@@ -1,8 +1,8 @@
-from langchain_groq import ChatGroq
-from dotenv import load_dotenv
-import os
+#from langchain_groq import ChatGroq
+#from dotenv import load_dotenv
+#import os
 
-load_dotenv()
+#load_dotenv()
 
 #def get_gemini():
 #    return ChatGroq(
@@ -11,6 +11,11 @@ load_dotenv()
 #        temperature=0.7
 #    )
 
+from langchain_groq import ChatGroq
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 def get_gemini():
     return ChatGroq(
@@ -18,3 +23,4 @@ def get_gemini():
         api_key=os.getenv("GROQ_API_KEY"),
         temperature=0.7
     )
+
