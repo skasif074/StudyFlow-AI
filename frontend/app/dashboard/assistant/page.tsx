@@ -167,7 +167,7 @@ export default function AssistantPage() {
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
+          model: "qwen/qwen3.8-27b",
           messages: [
             {
               role: "system",
